@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stock Analysis Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+        }
+        #chatlog {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .user {
+            text-align: right;
+            color: #fff;
+            background-color: #007bff;
+            max-width: 70%;
+            margin-left: auto;
+        }
+        .bot {
+            text-align: left;
+            color: #fff;
+            background-color: #28a745;
+            max-width: 70%;
+        }
+        #input-container {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        #queryInput {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stock Analysis Chatbot</h1>
+    <div id="chatlog"></div>
+    <div id="input-container">
+        <input type="text" id="queryInput" placeholder="Ask about a stock...">
+        <button onclick="sendQuery()">Send</button>
+    </div>
+    <script>
+        async function sendQuery() {
+            const query = document.getElementById('queryInput').value.trim();
+            if (!query) return;
+
+            const chatlog = document.getElementById('chatlog');
+            chatlog.innerHTML += `<div class="message user">You: ${query}</div>`;
+            document.getElementById('queryInput').value = '';
+
+            try {
+                chatlog.innerHTML += `<div class="message bot">Bot: Thinking...</div>`;
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                });
+                const data = await res.json();
+                chatlog.lastElementChild.remove(); // Remove "Thinking..." message
+                if (data.response) {
+                    chatlog.innerHTML += `<div class="message bot">Bot: ${data.response}</div>`;
+                } else if (data.error) {
+                    chatlog.innerHTML += `<div class="message bot">Bot: ${data.error}</div>`;
+                }
+            } catch (error) {
+                chatlog.lastElementChild.remove();
+                chatlog.innerHTML += `<div class="message bot">Bot: Error connecting to the server.</div>`;
+            }
+            chatlog.scrollTop = chatlog.scrollHeight; // Scroll to bottom
+        }
+
+        // Allow sending query with Enter key
+        document.getElementById('queryInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendQuery();
+        });
+    </script>
+</body>
+</html>
