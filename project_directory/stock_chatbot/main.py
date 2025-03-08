@@ -3,7 +3,8 @@ import os
 import sys
 import traceback
 from flask import Flask, request, jsonify, render_template
-from .api_clients import FivePaisaClient, NeoAPI
+import neo_api_client
+from py5paisa import FivePaisaClient
 from .data_loader import load_stock_data
 from .query_processor import process_query
 from .utils import stream_response
